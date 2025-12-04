@@ -1,0 +1,74 @@
+1) Mục tiêu hệ thống
+Nền tảng tuyển dụng “Jobhunter” kết nối nhà tuyển dụng và ứng viên:
+Ứng viên tìm kiếm việc làm, nộp hồ sơ, quản lý tài khoản và giao dịch.
+Nhà tuyển dụng đăng tin tuyển dụng, quản lý công ty, ứng viên.
+Quản trị hệ thống cấu hình quyền, vai trò, duyệt và thống kê.
+
+2) Kiến trúc & Công nghệ
+Backend: Spring Boot, Spring Security JWT, Spring Data JPA (MySQL), gửi email SMTP Gmail, tích hợp thanh toán VNPay.
+MySQL 
+JWT: 
+Email: spring.mail.*
+VNPay: 
+Phí dịch vụ: 
+Frontend: React + Vite + TypeScript.
+Cấu trúc trang trong react-vite-jobhunter/src/ với các trang client và admin, route bảo vệ, tích hợp API.
+
+3) Chức năng Backend (API)
+Xác thực & phân quyền
+Đăng ký, đăng nhập, cấp token/refresh token (JWT).
+Phân vai trò/quyền: Role/Permission cho các nhóm người dùng khác nhau.
+Bảo vệ tài nguyên theo quyền (Protected endpoints).
+
+Quản lý người dùng
+CRUD người dùng, cập nhật hồ sơ, đổi trạng thái.
+Quản lý công ty
+CRUD công ty, chi tiết công ty, danh sách công ty cho client.
+Quản lý kỹ năng
+CRUD kỹ năng để gắn vào tin tuyển dụng/hồ sơ.
+Quản lý việc làm (Job)
+CRUD tin tuyển dụng, gán kỹ năng, phân trang tìm kiếm.
+Quản lý bài viết (Post)
+CRUD bài viết/chia sẻ thông tin tuyển dụng.
+Quản lý hồ sơ (Resume)
+Ứng viên tạo/cập nhật hồ sơ, nộp hồ sơ vào job.
+Tính phí nộp hồ sơ nếu cấu hình tuananh.fee.apply > 0.
+Tệp & upload
+Upload CV/hình ảnh theo tuananh.upload-file.base-uri, giới hạn dung lượng: spring.servlet.multipart.*.
+Email
+Gửi email xác minh/tương tác qua SMTP Gmail (spring.mail.*).
+Thanh toán VNPay
+Tạo giao dịch, redirect tới VNPay sandbox, xử lý returnUrl tại /api/v1/payments/return.
+Thu phí tạo bài đăng (tuananh.fee.create-post) và/hoặc nộp hồ sơ.
+Thống kê
+API tổng hợp số liệu người dùng, bài đăng, ứng tuyển, doanh thu.
+Hỗ trợ khác
+Phân trang 1-based (spring.data.web.pageable.one-indexed-parameters=true).
+Log SQL, chuẩn hóa naming JPA.
+(Các controller/service tiêu biểu: AuthController, UserController, CompanyController, JobController, ResumeController, PostController, SkillController, PaymentController, StatisticsController, RoleController, PermissionController, EmailController, FileController… cùng các service tương ứng trong vn.tuananh.jobhunter.service.*.)
+
+4) Chức năng Frontend
++) Client (ứng viên/khách)
+Trang chủ, tìm kiếm việc làm, danh sách công ty và bài viết.
+Xem chi tiết công ty/việc làm.
+Đăng ký/đăng nhập, quản lý tài khoản.
+Nộp hồ sơ (upload CV), theo dõi trạng thái.
+Nạp tiền/thanh toán (VNPay) để dùng các dịch vụ tính phí.
++) Admin
+Dashboard tổng quan.
+Quản lý người dùng.
+Quản lý công ty.
+Quản lý tin tuyển dụng (Job) và kỹ năng (Skill).
+Quản lý bài viết (Post).
+Quản lý hồ sơ (Resume).
+Quản lý vai trò (Role) và quyền (Permission).
+Phân trang, bảng dữ liệu, form tạo/sửa, modal xác nhận.
++) Hạ tầng UI
+ProtectedRoute và kiểm tra permissions để chặn truy cập trái phép.
+Tích hợp axios tùy biến, cấu hình frontend-url khớp backend CORS (tuananh.frontend-url=http://localhost:3000).
+
+5) Luồng nghiệp vụ chính
+Đăng ký/đăng nhập -> cấp JWT -> truy cập tính năng theo quyền.
+Nhà tuyển dụng tạo công ty, đăng tin (có thể mất phí) -> ứng viên tìm kiếm và nộp hồ sơ -> email thông báo.
+Người dùng nạp tiền/thanh toán qua VNPay -> backend xác thực giao dịch tại vnp-return-url -> cập nhật trạng thái.
+Quản trị quản lý quyền/role, duyệt nội dung, theo dõi thống kê.

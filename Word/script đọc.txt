@@ -1,0 +1,99 @@
+0:00 – 0:20 Giới thiệu tổng quan
+
+Xin chào thầy/cô và mọi người. Em xin giới thiệu đồ án “Jobhunter” – một nền tảng tuyển dụng kết nối nhà tuyển dụng và ứng viên. Dự án fullstack gồm Backend Spring Boot và Frontend React Vite, hỗ trợ đăng tin tuyển dụng, tìm việc, nộp hồ sơ, phân quyền, gửi email và thanh toán VNPay.
++)Hình ảnh hiển thị:
+Màn hình VS Code/IDE mở thư mục gốc c:\test/ với 2 thư mục chính: java-spring-jobhunter/ và react-vite-jobhunter/.
+Lướt nhanh file README.md nếu có mô tả ngắn.
+
+0:20 – 0:50 Kiến trúc & Công nghệ
+
+Về kiến trúc: Backend sử dụng Spring Boot, Spring Security JWT, Spring Data JPA với MySQL. Tích hợp email SMTP Gmail và cổng thanh toán VNPay. Frontend dùng React + Vite + TypeScript, có route bảo vệ và phân quyền theo vai trò.
++)Hình ảnh hiển thị:
+Sơ đồ khối đơn giản (có thể tự vẽ): Client (React) <-> API (Spring Boot) <-> MySQL + Email + VNPay.
+Phóng to hai thư mục java-spring-jobhunter/ và react-vite-jobhunter/.
+
+0:50 – 1:30 Cấu hình quan trọng (Backend)
+
+Đây là các cấu hình chính trong src/main/resources/application.properties: kết nối MySQL, JWT, upload file, email, VNPay, fee dịch vụ và CORS với frontend.
+Cụ thể: MySQL jdbc:mysql://localhost:3306/jobhunter, JWT tuananh.jwt.*, upload tại tuananh.upload-file.base-uri, email spring.mail.*, VNPay với vnp-return-url tại /api/v1/payments/return, và tuananh.frontend-url=http://localhost:3000.
++)Hình ảnh hiển thị:
+Mở java-spring-jobhunter/src/main/resources/application.properties và highlight các dòng:
+spring.datasource.*
+tuananh.jwt.*
+tuananh.upload-file.base-uri
+spring.mail.*
+tuananh.vnpay.*
+tuananh.frontend-url
+tuananh.fee.apply và tuananh.fee.create-post
+
+1:30 – 2:20 Các module Backend (Controller/Service)
+
+Backend được tổ chức theo controller và service:
+Xác thực: AuthController
+Quản lý người dùng: UserController và phân quyền: RoleController, PermissionController
+Công ty: CompanyController
+Tin tuyển dụng: JobController + SkillController
+Bài viết: PostController
+Hồ sơ: ResumeController
+Upload file: FileController
+Email: EmailController
+Thanh toán: PaymentController và giao dịch: TransactionController
+Thống kê: StatisticsController
+Mỗi controller có service tương ứng trong vn.tuananh.jobhunter.service.* để tách logic nghiệp vụ.
+Hình ảnh hiển thị:
+Mở java-spring-jobhunter/src/main/java/vn/tuananh/jobhunter/controller/ và show danh sách file controller.
+Lướt qua AuthController.java, JobController.java, PaymentController.java để thấy annotation @RestController và mapping.
+
+2:20 – 3:10 Frontend React – cấu trúc và tính năng
+
+Ở frontend, code nằm tại react-vite-jobhunter/src/. Ứng dụng có hai khu vực:
+Client: trang chủ, tìm kiếm việc, xem công ty, bài viết, nộp hồ sơ, nạp tiền.
+Admin: dashboard, quản lý user, company, job, skill, post, resume, role, permission.
+Hệ thống dùng axios tùy biến, route bảo vệ ProtectedRoute, và cấu hình quyền trong config/permissions.ts.
++)Hình ảnh hiển thị:
+Mở react-vite-jobhunter/src/ rồi lướt qua:
+pages/admin/*.tsx (ví dụ: user.tsx, company.tsx, job/job.tsx, role.tsx, permission.tsx)
+pages/client hoặc pages/home/index.tsx
+components/share/protected-route.ts/ và config/axios-customize.ts, config/permissions.ts.
+
+3:10 – 4:10 Luồng nghiệp vụ tiêu biểu
+
+Luồng 1: Đăng ký/đăng nhập. Người dùng đăng nhập, nhận JWT và truy cập vào các page phù hợp với quyền. Đây là AuthController ở backend và form login.tsx ở frontend.
+Luồng 2: Nhà tuyển dụng tạo công ty, đăng tin tuyển dụng. Tin có thể gắn skill, phân trang tìm kiếm. Phí tạo bài đăng được cấu hình bằng tuananh.fee.create-post.
+Luồng 3: Ứng viên tìm kiếm việc và nộp hồ sơ. Hệ thống hỗ trợ upload CV theo tuananh.upload-file.base-uri. Nếu có phí nộp hồ sơ (tuananh.fee.apply), người dùng sẽ thanh toán trước khi nộp.
+Luồng 4: Thanh toán qua VNPay. Frontend chuyển hướng sang VNPay sandbox, backend xử lý kết quả tại endpoint vnp-return-url và cập nhật giao dịch.
+Luồng 5: Email thông báo/ xác minh gửi qua SMTP Gmail, cấu hình tại spring.mail.*.
+Luồng 6: Admin dùng trang quản trị để xem thống kê, quản lý người dùng và phân quyền theo vai trò.
+
++)Hình ảnh hiển thị:
+Vẽ/chiếu sơ đồ sequence đơn giản từng luồng hoặc quay demo nhanh:
+Màn hình pages/auth/login.tsx đăng nhập.
+Trang admin pages/admin/dashboard.tsx hoặc layout.admin.tsx.
+Modal tạo job components/admin/job/upsert.job.tsx.
+Modal nộp hồ sơ components/client/modal/apply.modal.tsx.
+Màn hình VNPay sandbox (ảnh minh họa) + file application.properties highlight tuananh.vnpay.vnp-return-url.
+4:10 – 4:40 Cơ sở dữ liệu và dữ liệu mẫu
+
+Lời đọc:
+Hệ thống dùng MySQL, tự động cập nhật schema bằng JPA (spring.jpa.hibernate.ddl-auto=update). Dự án có file dữ liệu mẫu company-mock-data.sql và company-mockdata.sql để khởi tạo công ty/ví dụ.
+Hình ảnh hiển thị:
+Mở c:\test\company-mock-data.sql và java-spring-jobhunter/company-mockdata.sql, lướt vài dòng insert minh họa.
+4:40 – 5:00 Tổng kết
+
+Lời đọc:
+Tổng kết lại, Jobhunter là nền tảng tuyển dụng đầy đủ tính năng: quản lý người dùng, công ty, tin tuyển dụng, hồ sơ; phân quyền chặt chẽ; gửi email; thanh toán VNPay; và giao diện web trực quan cho cả người dùng và admin. Cảm ơn thầy/cô và mọi người đã theo dõi video.
+Hình ảnh hiển thị:
+Lại chiếu sơ đồ tổng quan kiến trúc.
+Kết bằng màn hình trang chủ hoặc dashboard admin.
+Gợi ý quay/chèn hình ảnh nhanh
+
+Màn hình IDE hiển thị cấu trúc thư mục:
+java-spring-jobhunter/src/main/resources/application.properties
+java-spring-jobhunter/src/main/java/vn/tuananh/jobhunter/controller/
+react-vite-jobhunter/src/pages/admin/*.tsx, src/pages/auth/*.tsx
+Chụp 1-2 ảnh minh họa luồng thanh toán VNPay sandbox.
+Nếu có demo chạy thực tế, chèn cảnh:
+Đăng nhập -> chuyển trang admin.
+Tạo job -> hiển thị job list.
+Nộp hồ sơ -> hiển thị modal apply.
+VNPay -> quay màn hình redirect và return URL.
